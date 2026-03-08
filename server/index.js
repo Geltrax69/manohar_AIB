@@ -130,7 +130,20 @@ if (!fs.existsSync('uploads')) {
 }
 
 // Security middleware
-app.use(helmet())
+app.use(helmet({
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://cdn.jsdelivr.net"],
+      connectSrc: ["'self'", "https://cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      fontSrc: ["'self'", "data:"],
+      workerSrc: ["'self'", "blob:"]
+    }
+  }
+}))
 const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
@@ -138,11 +151,14 @@ const allowedOrigins = [
   ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean) : [])
 ]
 
-app.use(cors({
+const strictCors = process.env.CORS_STRICT === 'true'
+app.use('/api', cors({
   origin: (origin, callback) => {
     // Non-browser or same-origin requests may not include Origin
     if (!origin) return callback(null, true)
     if (allowedOrigins.includes(origin)) return callback(null, true)
+    // In non-strict mode, allow unknown origins to avoid blocking same-service deploys.
+    if (!strictCors) return callback(null, true)
     return callback(new Error(`CORS blocked for origin: ${origin}`))
   },
   credentials: true
