@@ -136,18 +136,15 @@ export default function CodeExecutor({ code, language, onClose, onSuccess, onErr
     try {
       // Capture console.log
       const logs = []
-      const originalLog = console.log
-      console.log = (...args) => {
+      const logger = (...args) => {
         logs.push(args.map(arg =>
           typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
         ).join(' '))
       }
 
-      // Execute code
-      eval(code)
-
-      // Restore console.log
-      console.log = originalLog
+      // Execute user code with a scoped console proxy instead of eval()
+      const run = new Function('console', `"use strict";\n${code}`)
+      run({ log: logger })
 
       setOutput(logs.join('\n') || 'Code executed successfully (no output)')
       analyzeComplexity(code)

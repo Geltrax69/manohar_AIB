@@ -21,7 +21,7 @@ export const validators = {
     if (!value) return 'Name is required'
     if (value.length < 2) return 'Name must be at least 2 characters'
     if (value.length > 50) return 'Name must be less than 50 characters'
-    if (!/^[a-zA-Z\s]+$/.test(value)) return 'Name can only contain letters and spaces'
+    if (!/^[\p{L}\s'-]+$/u.test(value)) return 'Name can only contain letters, spaces, apostrophes, and hyphens'
     return null
   },
 
