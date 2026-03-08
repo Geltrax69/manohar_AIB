@@ -1133,6 +1133,15 @@ app.get('/api/health', async (req, res) => {
   })
 })
 
+// Serve frontend build in production (single-service deploy on Render)
+const frontendDistPath = path.join(__dirname, '..', 'dist')
+if (NODE_ENV === 'production' && fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath))
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'))
+  })
+}
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Endpoint not found' })
