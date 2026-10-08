@@ -1,252 +1,94 @@
-# LinguaDev AI
+# LinguaDev AI — Learn to Code in Your Language
 
-LinguaDev AI is an AWS-powered, multilingual platform that democratizes coding education and boosts developer productivity through AI-driven tools tailored for India's linguistic and economic landscape.
+> ## Status: 🟡 In Progress
+>
+> <progress value="70" max="100"></progress>
+>
+> **Progress: 70%** — Full learning platform (courses, tutor, practice, badges) is built; AI features need AWS/Gemini keys to come alive
 
-## Overview
+<p align="center">
+  <img src="./banner.webp" alt="LinguaDev AI banner" width="100%" />
+</p>
 
-The platform targets:
--   **Students (18-30)** from non-English dominant regions.
--   **Developers** seeking productivity tools in their native language.
--   **Educators and coding bootcamp instructors**.
--   **Government initiatives** like Digital India and Skill India.
+![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-232F3E?style=flat-square&logo=amazonaws&logoColor=white)
 
-**Supported Languages (MVP):** Hindi, Tamil, English
-**Supported Languages (Full):** Hindi, Tamil, Telugu, Kannada, Bengali, Marathi, Gujarati, Punjabi, Odia, Urdu
+## What it is
 
-## Key Features
+A multilingual coding-education platform: learn programming in your own language with AI tutoring. The React frontend has course catalogs, interactive lessons, a practice playground, an AI tutor chat, dashboards with XP/badges/levels, and certifications. The Express backend serves courses, tracks progress, handles auth (JWT + bcrypt), and plugs into AWS Bedrock (AI), Polly (text-to-speech), Translate (multilingual content), and S3 — with a free Gemini fallback when AWS isn't configured. There's also an in-memory store so it runs without MongoDB.
 
--   **User Onboarding & Authentication**: Secure sign-up via email/phone, social login, and language selection.
--   **Personalized Learning Path**: AI-generated curriculum based on skill level and goals.
--   **AI Tutor**: 24/7 conversational AI tutor for doubt resolution and code explanation in native languages.
--   **Code Editor**: Multilingual code editor with AI suggestions, syntax highlighting, and real-time error detection.
--   **Gamification**: Badges, points, leaderboards, and challenges to keep users engaged.
--   **Developer Productivity Tools**: AI code generation, debugging, optimization, and multilingual documentation.
--   **Offline Functionality**: Offline content caching, code execution, and analytics syncing.
--   **Analytics & Reporting**: Comprehensive dashboards for users and educators.
+## What works (verified)
 
-## System Architecture
+- ✅ **Full page set** — Landing, LanguageSelection, Courses, CourseLesson, Practice, Tutor, Dashboard, Profile, Certifications, Settings, Login/Register
+- ✅ **Express API** — hardened with helmet, rate limiting, morgan logging, CORS (31 route/handler registrations in `server/index.js`)
+- ✅ **Data models** — `User`, `Course`, `Progress` (Mongoose) + `inMemoryStore` fallback
+- ✅ **Gamification data** — badges, XP levels, `calculateLevel`/`getNextLevel` in `server/data/badges.js`
+- ✅ **AI service layer** — Bedrock + Gemini (`services/bedrock.js`, `services/gemini.js`) with `isConfigured` guards
+- ✅ **Media services** — Polly TTS, Translate (incl. code-comment translation), S3 uploads
+- ✅ **Dev runner** — `scripts/dev-runner.js` boots frontend + backend together
 
-LinguaDev AI follows a microservices architecture deployed on AWS, designed for scalability, reliability, and low-latency access across India.
+## Tech stack
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          CLIENT LAYER (User Facing)                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐         │
-│  │  Web Browser     │  │  Mobile App      │  │  Desktop App     │         │
-│  │  (React)         │  │  (React Native)  │  │  (Electron)      │         │
-│  └────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘         │
-│           │                     │                     │                    │
-│           └─────────────────────┼─────────────────────┘                    │
-│                                 │                                          │
-│                    ┌────────────▼────────────┐                             │
-│                    │  Offline-First Cache   │                             │
-│                    │  (IndexedDB/SQLite)    │                             │
-│                    └────────────┬────────────┘                             │
-│                                 │                                          │
-└─────────────────────────────────┼──────────────────────────────────────────┘
-                                  │
-                    ┌─────────────▼──────────────┐
-                    │   AWS API Gateway         │
-                    │   (REST + GraphQL)        │
-                    └─────────────┬──────────────┘
-                                  │
-┌─────────────────────────────────┼──────────────────────────────────────────┐
-│                      BACKEND LAYER (AWS Services)                          │
-├─────────────────────────────────┼──────────────────────────────────────────┤
-│                                 │                                          │
-│  ┌──────────────────────────────▼──────────────────────────────────────┐  │
-│  │                    AWS Lambda Functions                             │  │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │  │
-│  │  │ Auth Handler │  │ Learning API │  │ Dev Tools API│             │  │
-│  │  │ (Cognito)    │  │ (Courses)    │  │ (Code Gen)   │             │  │
-│  │  └──────────────┘  └──────────────┘  └──────────────┘             │  │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │  │
-│  │  │ Analytics    │  │ Deployment   │  │ Collaboration│             │  │
-│  │  │ Handler      │  │ Handler      │  │ Handler      │             │  │
-│  │  └──────────────┘  └──────────────┘  └──────────────┘             │  │
-│  └──────────────────────────────┬───────────────────────────────────┘  │
-│                                 │                                       │
-│  ┌──────────────────────────────▼───────────────────────────────────┐  │
-│  │                    AI/ML CORE LAYER                              │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  AWS Bedrock (Foundation Models)                         │   │  │
-│  │  │  ├─ Claude 3 (Conversational AI, Tutoring)              │   │  │
-│  │  │  ├─ Code Llama (Code Generation, Debugging)            │   │  │
-│  │  │  └─ Mistral (Multilingual Support)                      │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  Amazon SageMaker (Model Training & Fine-tuning)        │   │  │
-│  │  │  ├─ Fine-tuned models for Indian languages             │   │  │
-│  │  │  ├─ Custom NLP models for code understanding           │   │  │
-│  │  │  └─ Personalization engine (user profiling)            │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  Amazon Comprehend (NLP Services)                        │   │  │
-│  │  │  ├─ Language detection                                  │   │  │
-│  │  │  ├─ Sentiment analysis                                  │   │  │
-│  │  │  └─ Entity recognition                                  │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  Amazon Translate (Language Translation)                │   │  │
-│  │  │  └─ Real-time code & documentation translation         │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  Amazon Polly (Text-to-Speech)                           │   │  │
-│  │  │  └─ Regional language audio for accessibility           │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  └──────────────────────────────┬───────────────────────────────────┘  │
-│                                 │                                       │
-│  ┌──────────────────────────────▼───────────────────────────────────┐  │
-│  │                    DATA LAYER                                    │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  Amazon DynamoDB (NoSQL - User Data)                     │   │  │
-│  │  │  ├─ User profiles & preferences                         │   │  │
-│  │  │  ├─ Learning progress & history                         │   │  │
-│  │  │  ├─ Code snippets & projects                            │   │  │
-│  │  │  └─ Real-time collaboration data                        │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  Amazon S3 (Object Storage)                              │   │  │
-│  │  │  ├─ Course content & media                              │   │  │
-│  │  │  ├─ Offline cache bundles                               │   │  │
-│  │  │  ├─ User-generated code & projects                      │   │  │
-│  │  │  └─ Analytics & logs                                    │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  Amazon RDS (Relational Database)                        │   │  │
-│  │  │  ├─ Analytics & reporting                               │   │  │
-│  │  │  ├─ Structured course data                              │   │  │
-│  │  │  └─ Leaderboard & gamification data                     │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  Amazon ElastiCache (Redis - Caching)                    │   │  │
-│  │  │  ├─ Session management                                  │   │  │
-│  │  │  ├─ Real-time collaboration state                       │   │  │
-│  │  │  └─ Leaderboard caching                                 │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  └──────────────────────────────┬───────────────────────────────────┘  │
-│                                 │                                       │
-│  ┌──────────────────────────────▼───────────────────────────────────┐  │
-│  │                    INTEGRATION LAYER                             │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  AWS Amplify (Deployment & Hosting)                      │   │  │
-│  │  │  └─ One-click deployment for user projects              │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  AWS CloudFront (CDN)                                    │   │  │
-│  │  │  └─ Low-latency content delivery in remote areas        │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  AWS EventBridge (Event-Driven Architecture)             │   │  │
-│  │  │  └─ Async processing, notifications, workflows          │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  └──────────────────────────────┬───────────────────────────────────┘  │
-│                                 │                                       │
-│  ┌──────────────────────────────▼───────────────────────────────────┐  │
-│  │                    SECURITY & MONITORING                         │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  AWS Cognito (Authentication & Authorization)            │   │  │
-│  │  │  ├─ User sign-up & login                                │   │  │
-│  │  │  ├─ Multi-factor authentication                         │   │  │
-│  │  │  └─ Role-based access control                           │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  AWS KMS (Key Management Service)                        │   │  │
-│  │  │  └─ Encryption at rest & in transit                     │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  AWS CloudWatch (Monitoring & Logging)                   │   │  │
-│  │  │  ├─ Application logs & metrics                          │   │  │
-│  │  │  ├─ Performance monitoring                              │   │  │
-│  │  │  └─ Alerts & dashboards                                 │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  AWS X-Ray (Distributed Tracing)                         │   │  │
-│  │  │  └─ Request tracing & performance analysis              │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  │                                                                   │  │
-│  │  ┌──────────────────────────────────────────────────────────┐   │  │
-│  │  │  AWS WAF (Web Application Firewall)                      │   │  │
-│  │  │  └─ Protection against common web exploits              │   │  │
-│  │  └──────────────────────────────────────────────────────────┘   │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+| Layer | Tech |
+|---|---|
+| Frontend | React, Vite, Tailwind CSS, React Router, Zustand (`src/store`) |
+| Backend | Node.js, Express, helmet, express-rate-limit |
+| Database | MongoDB (Mongoose) or in-memory store |
+| AI | AWS Bedrock (+ Gemini free fallback), Polly, Translate |
+| Infra | S3, CloudWatch, render.yaml for deploy |
+
+## How to run
+
+You need **Node 18+**. MongoDB is optional (in-memory store works without it).
+
+```bash
+# Backend
+cd server && npm install   # (if server has its own package.json; otherwise root)
+npm run server             # node server/index.js — http://localhost:5000 (see .env.example)
+
+# Frontend
+npm install
+npm run dev                # vite — http://localhost:5173
 ```
 
-## Tech Stack
+Copy `.env.example` to `.env` and fill in: `MONGODB_URI` (optional), `AWS_*` keys (optional — Gemini key works as the free AI path), `JWT_SECRET`. Without AI keys the courses, practice, and dashboard still work; tutor/AI features degrade gracefully via the `isConfigured` guards.
 
--   **Frontend**:
-    -   React Native (Mobile)
-    -   React (Web)
-    -   Electron (Desktop)
-    -   IndexedDB/SQLite (Offline Cache)
--   **Backend**:
-    -   AWS Lambda (Serverless)
-    -   API Gateway
-    -   Cognito (Auth)
--   **Database**:
-    -   DynamoDB (NoSQL - User Data)
-    -   RDS (Relational - Analytics)
-    -   ElastiCache (Redis - Caching)
-    -   S3 (Object Storage)
--   **AI/ML**:
-    -   AWS Bedrock (Claude 3, Code Llama, Mistral)
-    -   SageMaker (Model Training)
-    -   Comprehend (NLP)
-    -   Translate (Translation)
-    -   Polly (Text-to-Speech)
--   **Infrastructure**:
-    -   AWS CloudFormation
-    -   Amplify
-    -   CloudFront (CDN)
-    -   EventBridge
-    -   KMS
-    -   CloudWatch
-    -   X-Ray
-    -   WAF
+## Screenshots
 
-## API Documentation
+No screenshots are committed in the repo. The banner above is generated; the app includes a landing page, course catalog, lesson player, AI tutor chat, and a gamified dashboard.
 
-The API design includes several key endpoints:
+## What you can add more
 
--   **Authentication**: `/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`
--   **Learning**: `/learning/assessment`, `/learning/path/:pathId`, `/learning/lesson/:lessonId`
--   **AI Tutor**: `/ai/tutor/chat`
--   **Code Editor**: `/editor/execute`, `/editor/submit`
--   **Developer Tools**: `/dev/generate-code`, `/dev/debug`
--   **Analytics**: `/analytics/dashboard`
+- [ ] **Screenshots / demo video** — the landing + tutor are the selling points; show them
+- [ ] **Real course content** — `server/data/courses.js` is the seed; expand the catalog
+- [ ] **Code execution** — the Practice page needs a runnable sandbox (or judge0 API)
+- [ ] **Streaks & leaderboards** — badges exist; add social motivation
+- [ ] **Offline PWA** — lessons cached for low-connectivity learners
+- [ ] **Trim AWS surface** — 14 service files is a lot; document which are actually wired vs aspirational
 
-## Documentation
+## Project structure
 
-This repository contains detailed documentation for the project:
+```
+├── src/                  # React frontend
+│   ├── pages/            # Landing, Courses, CourseLesson, Practice, Tutor,
+│   │                     # Dashboard, Certifications, Profile, Settings…
+│   ├── components/       # UI components
+│   ├── store/            # Zustand state
+│   └── hooks/ utils/
+├── server/
+│   ├── index.js          # Express app (auth, courses, progress, AI routes)
+│   ├── models/           # User, Course, Progress (Mongoose)
+│   ├── services/         # bedrock, gemini, polly, translate, s3, …
+│   ├── data/             # courses.js, badges.js
+│   └── database.js / inMemoryStore.js
+├── banner.webp
+├── render.yaml
+└── vite.config.js
+```
 
--   [Requirements Specification](requirements.md): Detailed functional and non-functional requirements.
--   [Design Specification](design.md): In-depth system design, data models, and API specifications.
--   [System Architecture](ARCHITECTURE.md): High-level architecture and data flow diagrams.
-
-## Contributing
-
-1.  Fork the repository.
-2.  Create a new branch (`git checkout -b feature/your-feature`).
-3.  Commit your changes (`git commit -m 'Add some feature'`).
-4.  Push to the branch (`git push origin feature/your-feature`).
-5.  Open a Pull Request.
-
-## License
-
-[License Information to be added]
+---
+*README written after code audit on 2026-10-08.*
